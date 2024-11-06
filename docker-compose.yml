@@ -1,0 +1,62 @@
+services:
+  # Servicio Draco para recibir datos desde Orion y almacenarlos en MongoDB
+  draco:
+    image: ging/fiware-draco:2.1.0
+    container_name: fiware-draco
+    ports:
+      - 8181:8181      # Puerto de interfaz web de Draco
+      - 5050:5050      # Puerto de entrada de datos desde Orion
+    networks:
+      - fiware-network
+    environment:
+      - NIFI_WEB_HTTP_PORT=8181
+      - SINGLE_USER_CREDENTIALS_USERNAME=admin
+      - SINGLE_USER_CREDENTIALS_PASSWORD=pass1234567890
+      - DRACO_DEBUG_LEVEL=INFO
+      - DRACO_MONGO_SERVICE=mongo-draco
+      - DRACO_MONGO_PORT=27017
+
+  # Servicio Orion Context Broker para gestionar el contexto y notificaciones
+  orion:
+    image: fiware/orion:3.10.1    # Cambiado a Orion-v2
+    container_name: fiware-orion
+    ports:
+      - 1026:1026      # Puerto de Orion
+    networks:
+      - fiware-network
+    depends_on:
+      - mongo-db
+    command: -dbhost mongo-db -logLevel DEBUG
+    environment:
+      - ORION_LOG_LEVEL=DEBUG
+
+  # Base de datos MongoDB para Orion
+  mongo-db:
+    image: mongo:4.4
+    container_name: db-mongo
+    ports:
+      - 27017:27017    # Puerto MongoDB para Orion
+    networks:
+      - fiware-network
+    volumes:
+      - mongo-data:/data/db   # Persistencia de datos
+    command: --nojournal
+
+  # Base de datos MongoDB para Draco
+  mongo-draco:
+    image: mongo:4.4
+    container_name: db-mongo-draco
+    ports:
+      - 27018:27017    # Puerto MongoDB para Draco
+    networks:
+      - fiware-network
+    volumes:
+      - draco-data:/data/db   # Persistencia de datos
+
+networks:
+  fiware-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
+  draco-data:
