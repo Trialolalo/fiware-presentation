@@ -101,13 +101,13 @@ docker-compose up -d
 docker ps
 
 # Verificar la red
-docker network inspect fiware-network
+docker network inspect fiware-presentation_fiware-network
 
 # Conectar contenedores a la red si es necesario
-docker network connect fiware-network fiware-draco
-docker network connect fiware-network fiware-orion
-docker network connect fiware-network db-mongo
-docker network connect fiware-network db-mongo-draco
+docker network connect fiware-presentation_fiware-network fiware-draco
+docker network connect fiware-presentation_fiware-network fiware-orion
+docker network connect fiware-presentation_fiware-network db-mongo
+docker network connect fiware-presentation_fiware-network db-mongo-draco
 
 # Verificar que Orion responde
 curl localhost:1026/version
@@ -244,7 +244,7 @@ docker ps
 2. Verificar la conectividad de red:
 
 ```bash
-docker network inspect fiware-network
+docker network inspect fiware-presentation_fiware-network
 ```
 
 3. Verificar logs de Draco:
