@@ -74,7 +74,6 @@ async function sendToOrion(data) {
   }
 }
 
-// Llamada periódica cada 5 minutos para obtener y procesar los datos
 setInterval(fetchAndSendWeatherData, 1 * 60 * 1000);
 
 // Iniciar el servidor
