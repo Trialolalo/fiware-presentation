@@ -1,11 +1,12 @@
+version: "3.9"
+
 services:
-  # Servicio Draco para recibir datos desde Orion y almacenarlos en MongoDB
   draco:
     image: ging/fiware-draco:2.1.0
     container_name: fiware-draco
     ports:
-      - 8181:8181      # Puerto de interfaz web de Draco
-      - 5050:5050      # Puerto de entrada de datos desde Orion
+      - 8181:8181
+      - 5050:5050
     networks:
       - fiware-network
     environment:
@@ -15,13 +16,15 @@ services:
       - DRACO_DEBUG_LEVEL=INFO
       - DRACO_MONGO_SERVICE=mongo-draco
       - DRACO_MONGO_PORT=27017
+      - FIWARE_SERVICE=default
+      - FIWARE_SERVICEPATH=/
+      - DRACO_MONGO_DB=sth_default
 
-  # Servicio Orion Context Broker para gestionar el contexto y notificaciones
   orion:
-    image: fiware/orion:3.10.1    # Cambiado a Orion-v2
+    image: fiware/orion:3.10.1
     container_name: fiware-orion
     ports:
-      - 1026:1026      # Puerto de Orion
+      - 1026:1026
     networks:
       - fiware-network
     depends_on:
@@ -30,28 +33,37 @@ services:
     environment:
       - ORION_LOG_LEVEL=DEBUG
 
-  # Base de datos MongoDB para Orion
   mongo-db:
     image: mongo:4.4
     container_name: db-mongo
     ports:
-      - 27017:27017    # Puerto MongoDB para Orion
+      - 27017:27017
     networks:
       - fiware-network
     volumes:
-      - mongo-data:/data/db   # Persistencia de datos
+      - mongo-data:/data/db
     command: --nojournal
 
-  # Base de datos MongoDB para Draco
   mongo-draco:
     image: mongo:4.4
     container_name: db-mongo-draco
     ports:
-      - 27018:27017    # Puerto MongoDB para Draco
+      - 27018:27017
     networks:
       - fiware-network
     volumes:
-      - draco-data:/data/db   # Persistencia de datos
+      - draco-data:/data/db
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-server
+    volumes:
+      - ./dataModel.Weather:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "8080:80"
+    networks:
+      - fiware-network
 
 networks:
   fiware-network:

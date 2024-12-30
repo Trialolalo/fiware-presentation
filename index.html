@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather Forecast</title>
+  <!-- Incluir las librerías de Chart.js y el adaptador de fechas -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@1.0.0"></script>
+
+</head>
+<body>
+  <h1>Weather Forecast Historical Data</h1>
+  <canvas id="weatherChart" width="800" height="400"></canvas>
+
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@1.0.0">
+    let weatherChart = null;
+
+    function validateAndFormatData(data) {
+      const validData = data.filter(entry =>
+        entry.timestamp &&
+        typeof entry.timestamp === 'string' &&
+        (entry.temperature !== undefined || entry.humidity !== undefined)
+      );
+
+      const labels = data.map(entry => {
+        const dateObserved = entry.dateObserved?.value?.['@value']; // Extraer el valor correcto
+        return dateObserved ? new Date(dateObserved).toISOString() : null;
+      }).filter(label => label !== null); // Filtra valores nulos
+
+      const temperatures = validData.map(entry => {
+        if (typeof entry.temperature === 'object' && entry.temperature.value !== undefined) {
+          return entry.temperature.value;
+        }
+        return typeof entry.temperature === 'number' ? entry.temperature : null;
+      }).filter(temp => temp !== null); // Eliminar valores nulos
+
+      const humidities = validData.map(entry => {
+        if (typeof entry.humidity === 'object' && entry.humidity.value !== undefined) {
+          return entry.humidity.value;
+        }
+        return typeof entry.humidity === 'number' ? entry.humidity : null;
+      }).filter(humidity => humidity !== null); // Eliminar valores nulos
+
+      return { labels, temperatures, humidities };
+    }
+
+    function createLineChart(labels, temperatures, humidities) {
+      const ctx = document.getElementById('weatherChart').getContext('2d');
+
+      // Verificar y destruir el gráfico anterior
+      if (weatherChart && typeof weatherChart.destroy === 'function') {
+        weatherChart.destroy();
+      }
+
+      // Crear un nuevo gráfico
+      weatherChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Temperature (°C)',
+              data: temperatures,
+              borderColor: 'rgba(255, 99, 132, 1)',
+              backgroundColor: 'rgba(255, 99, 132, 0.2)',
+              borderWidth: 2,
+              tension: 0.4
+            },
+            {
+              label: 'Humidity (%)',
+              data: humidities,
+              borderColor: 'rgba(54, 162, 235, 1)',
+              backgroundColor: 'rgba(54, 162, 235, 0.2)',
+              borderWidth: 2,
+              tension: 0.4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'top'
+            }
+          },
+          scales: {
+            x: {
+              type: 'time', // Asegurar que el eje sea temporal
+              time: {
+                parser: 'yyyy-MM-ddTHH:mm:ss.sssZ', // Formato ISO
+                unit: 'minute' // Ajusta según tus datos
+              },
+              title: {
+                display: true,
+                text: 'Timestamp'
+              }
+            },
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Value'
+              }
+            }
+          }
+        }
+      });
+
+      console.log('Gráfico actualizado correctamente');
+    }
+
+async function fetchHistoricalData() {
+  try {
+    const response = await fetch('http://localhost:3000/historical-data');
+    const data = await response.json();
+
+    console.log("Datos históricos:", data); // Verifica los datos en la consola
+
+    // Verificar y filtrar temperaturas y humedades no nulas
+    const temperatures = data.map(entry => {
+      return entry.temperature !== undefined && entry.temperature !== null ? entry.temperature : null;
+    }).filter(temp => temp !== null);
+
+    const humidities = data.map(entry => {
+      return entry.humidity !== undefined && entry.humidity !== null ? entry.humidity : null;
+    }).filter(humidity => humidity !== null);
+
+    // Mapeo de datos para Chart.js
+    const labels = data.map(entry => new Date(entry.timestamp)); // Convertir timestamps a fechas
+
+    // Crear el gráfico
+    createLineChart(labels, temperatures, humidities);
+  } catch (error) {
+    console.error('Error al obtener datos históricos:', error);
+  }
+}
+
+
+
+fetchHistoricalData();
+  </script>
+  <script src="main.js"></script>
+
+</body>
+</html>
