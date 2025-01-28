@@ -1,0 +1,45 @@
+body {
+  font-family: "Roboto", serif;
+  margin: 0;
+  background-color: hsl(214, 13%, 11%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; 
+}
+
+iframe {
+  flex-grow: 1;
+  border: none;
+}
+
+h1 {
+  margin-bottom: 1rem;
+  color: white;
+}
+
+label {
+  font-weight: bold;
+  margin-right: 0.5rem;
+  color: white;
+}
+
+select {
+  padding: 0.2rem;
+  font-size: 0.8rem;
+  margin-bottom: 0.8rem;
+}
+
+section{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 800px;
+  margin-bottom: 1rem;
+  margin: 0 auto; 
+}
+
+section h2 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+}

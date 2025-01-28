@@ -1,0 +1,45 @@
+body {
+  background-color: #181c20;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  font-family: Roboto, serif;
+  display: flex;
+}
+
+iframe {
+  border: none;
+  flex-grow: 1;
+}
+
+h1 {
+  color: #fff;
+  margin-bottom: 1rem;
+}
+
+label {
+  color: #fff;
+  margin-right: .5rem;
+  font-weight: bold;
+}
+
+select {
+  margin-bottom: .8rem;
+  padding: .2rem;
+  font-size: .8rem;
+}
+
+section {
+  justify-content: space-between;
+  align-items: center;
+  width: 800px;
+  margin: 0 auto;
+  display: flex;
+}
+
+section h2 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+/*# sourceMappingURL=index.3a01df49.css.map */

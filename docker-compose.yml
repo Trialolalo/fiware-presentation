@@ -54,16 +54,23 @@ services:
     volumes:
       - draco-data:/data/db
 
-  nginx:
-    image: nginx:alpine
-    container_name: nginx-server
-    volumes:
-      - ./dataModel.Weather:/usr/share/nginx/html:ro
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    environment:
+      - TERM=linux
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-polystat-panel
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_SECURITY_COOKIE_SAMESITE=none
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_NAME=Main Org.
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+
     ports:
-      - "8080:80"
-    networks:
-      - fiware-network
+      - "3100:3000"
+    volumes:
+      - 'grafana_storage:/var/lib/grafana'  
 
 networks:
   fiware-network:
@@ -72,3 +79,6 @@ networks:
 volumes:
   mongo-data:
   draco-data:
+  grafana_storage: {}
+  db-config:
+  postgresdb:

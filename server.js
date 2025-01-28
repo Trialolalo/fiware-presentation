@@ -3,31 +3,25 @@ const express = require('express');
 const app = express();
 const port = 3000;
 
-// Función para procesar los datos meteorológicos
 async function fetchAndSendWeatherData() {
   try {
-    // Obtener datos de la API meteorológica
     const response = await axios.get('http://www.balearsmeteo.com/son_pou_torrent/test-tags.php');
     const weatherData = response.data;
 
-    // Validar estructura de datos de la API
     if (!weatherData || !weatherData.temp || !weatherData.temp.ago || !weatherData.baro) {
       console.error('Formato de datos inesperado de la API');
       return;
     }
 
-    // Extraer y convertir los datos relevantes
-    const temperature = parseFloat(weatherData.temp.ago[0]); // Última temperatura registrada
-    const pressure = parseFloat(weatherData.baro.value.value); // Presión atmosférica
-
+    const temperature = parseFloat(weatherData.temp.ago[0]); 
+    const pressure = parseFloat(weatherData.baro.value.value); 
     if (isNaN(temperature) || isNaN(pressure)) {
       console.error('Datos de clima no válidos');
       return;
     }
 
-    // Crear datos en formato NGSI v2
     const ngsiData = {
-      id: 'urn:ngsi-v2:WeatherObserved:001', // ID fijo para actualizar
+      id: 'urn:ngsi-v2:WeatherObserved:001', 
       type: 'WeatherObserved',
       temperature: { type: 'Number', value: temperature },
       pressure: { type: 'Number', value: pressure },
@@ -47,8 +41,13 @@ async function fetchAndSendWeatherData() {
 // Función para enviar los datos al Context Broker
 async function sendToOrion(data) {
   try {
+    const ngsiObject =  {
+      temperature: data.temperature,
+      pressure: data.pressure,
+      timestamp: data.timestamp
+    };
     // Intentar actualizar la entidad existente en Orion
-    const response = await axios.put(`http://localhost:1026/v2/entities/${data.id}/attrs`, data, {
+    const response = await axios.put(`http://localhost:1026/v2/entities/${data.id}/attrs`, ngsiObject, {
       headers: { 'Content-Type': 'application/json' },
     });
 
@@ -56,7 +55,6 @@ async function sendToOrion(data) {
       console.log(`Datos actualizados en Orion con éxito: ${data.id}`);
     }
   } catch (error) {
-    // Si la entidad no existe, intentar crearla
     if (error.response && error.response.status === 404) {
       try {
         const createResponse = await axios.post('http://localhost:1026/v2/entities', data, {
@@ -69,7 +67,7 @@ async function sendToOrion(data) {
         console.error('Error al crear entidad en Orion:', createError.message);
       }
     } else {
-      console.error('Error al actualizar entidad en Orion:', error.response ? error.response.data : error.message);
+      console.error('Error al actualizar entidad en Orion:', console.log(error));
     }
   }
 }
