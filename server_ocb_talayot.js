@@ -87,32 +87,32 @@ async function sendToOrion(data) {
 }
 
 // Crear una suscripción
-async function createSubscription() {
-  const subscription = {
-    description: "Suscripción a cambios de clima",
-    subject: {
-      entities: [{ idPattern: ".*", type: "WeatherObserved" }],
-      condition: { attrs: ["temperature", "pressure", "humidity"] }
-    },
-    notification: {
-      http: { url: "http://mi-url-notificacion:3002/notify" },
-      attrs: ["temperature", "pressure", "humidity"]
-    },
-    expires: "2026-02-01T00:00:00.00Z",
-    throttling: 5
-  };
+// async function createSubscription() {
+//   const subscription = {
+//     description: "Suscripción a cambios de clima",
+//     subject: {
+//       entities: [{ idPattern: ".*", type: "WeatherObserved" }],
+//       condition: { attrs: ["temperature", "pressure", "humidity"] }
+//     },
+//     notification: {
+//       http: { url: "http://mi-url-notificacion:3002/notify" },
+//       attrs: ["temperature", "pressure", "humidity"]
+//     },
+//     expires: "2026-02-01T00:00:00.00Z",
+//     throttling: 5
+//   };
 
-  try {
-    const response = await axiosInstance.post(SUBSCRIPTIONS_URL, subscription, {
-      headers: { 'Content-Type': 'application/json' },
-    });
-    if (response.status === 201) {
-      console.log('Suscripción creada con éxito:', response.data);
-    }
-  } catch (error) {
-    console.error('Error al crear suscripción:', error.message);
-  }
-}
+//   try {
+//     const response = await axiosInstance.post(SUBSCRIPTIONS_URL, subscription, {
+//       headers: { 'Content-Type': 'application/json' },
+//     });
+//     if (response.status === 201) {
+//       console.log('Suscripción creada con éxito:', response.data);
+//     }
+//   } catch (error) {
+//     console.error('Error al crear suscripción:', error.message);
+//   }
+// }
 
 // Endpoint para listar entidades
 // async function getAllEntities() {
@@ -128,7 +128,7 @@ async function createSubscription() {
 // getAllEntities();
 
 // Llama periódicamente a fetchAndSendWeatherData
-setInterval(fetchAndSendWeatherData, 1 * 60 * 1000);
+setInterval(fetchAndSendWeatherData, 5 * 60 * 1000);
 
 // Endpoint para probar crear suscripción
 app.get('/create-subscription', async (req, res) => {
