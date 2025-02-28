@@ -18,14 +18,14 @@ async function fetchAndSendWeatherData() {
     const response = await axios.get('http://www.balearsmeteo.com/son_pou_torrent/test-tags.php');
     const weatherData = response.data;
 
-    if (!weatherData || !weatherData.temp || !weatherData.temp.ago || !weatherData.baro || !weatherData.humedad) {
+    if (!weatherData || !weatherData.temp || !weatherData.temp.ago || !weatherData.baro || !weatherData.hum) {
       console.error('Formato de datos inesperado de la API');
       return;
     }
 
     const temperature = parseFloat(weatherData.temp.ago[0]); 
     const pressure = parseFloat(weatherData.baro.value.value); 
-    const humidity = parseFloat(weatherData.humedad.value.value); 
+    const humidity = parseFloat(weatherData.hum.value);
 
     if (isNaN(temperature) || isNaN(pressure) || isNaN(humidity)) {
       console.error('Datos de clima no válidos');
@@ -33,7 +33,7 @@ async function fetchAndSendWeatherData() {
     }
 
     const ngsiData = {
-      id: 'urn:ngsi-v2:WeatherObserved:001', 
+      id: 'urn:ngsi-v2:WeatherObserved:son_pou_torrent', 
       type: 'WeatherObserved',
       temperature: { type: 'Number', value: temperature },
       pressure: { type: 'Number', value: pressure },
@@ -49,6 +49,8 @@ async function fetchAndSendWeatherData() {
     console.error('Error al obtener o procesar los datos:', error.message);
   }
 }
+
+
 
 // Enviar datos al Context Broker
 async function sendToOrion(data) {
@@ -85,54 +87,45 @@ async function sendToOrion(data) {
 }
 
 // Crear una suscripción
-// async function createSubscription() {
-//   const subscription = {
-//     description: "Suscripción a cambios de clima",
-//     subject: {
-//       entities: [{ idPattern: ".*", type: "WeatherObserved" }],
-//       condition: { attrs: ["temperature", "humidity"] }
-//     },
-//     notification: {
-//       http: { url: "http://mi-url-notificacion:3000/notify" },
-//       attrs: ["temperature", "pressure", "humidity"]
-//     },
-//     expires: "2025-02-01T00:00:00.00Z",
-//     throttling: 5
-//   };
+async function createSubscription() {
+  const subscription = {
+    description: "Suscripción a cambios de clima",
+    subject: {
+      entities: [{ idPattern: ".*", type: "WeatherObserved" }],
+      condition: { attrs: ["temperature", "pressure", "humidity"] }
+    },
+    notification: {
+      http: { url: "http://mi-url-notificacion:3000/notify" },
+      attrs: ["temperature", "pressure", "humidity"]
+    },
+    expires: "2026-02-01T00:00:00.00Z",
+    throttling: 5
+  };
 
-//   try {
-//     const response = await axiosInstance.post(SUBSCRIPTIONS_URL, subscription, {
-//       headers: { 'Content-Type': 'application/json' },
-//     });
-//     if (response.status === 201) {
-//       console.log('Suscripción creada con éxito:', response.data);
-//     }
-//   } catch (error) {
-//     console.error('Error al crear suscripción:', error.message);
-//   }
-// }
-
-// Obtener todas las suscripciones
-// async function getSubscriptions() {
-//   try {
-//     const response = await axiosInstance.get(`${SUBSCRIPTIONS_URL}?limit=1000`);
-//     console.log('Suscripciones obtenidas:', response.data);
-//   } catch (error) {
-//     console.error('Error al obtener suscripciones:', error.message);
-//   }
-// }
-
-// Eliminar una suscripción
-async function deleteSubscription(subscriptionId) {
   try {
-    const response = await axiosInstance.delete(`${SUBSCRIPTIONS_URL}/${subscriptionId}`);
-    if (response.status === 204) {
-      console.log(`Suscripción eliminada con éxito: ${subscriptionId}`);
+    const response = await axiosInstance.post(SUBSCRIPTIONS_URL, subscription, {
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (response.status === 201) {
+      console.log('Suscripción creada con éxito:', response.data);
     }
   } catch (error) {
-    console.error(`Error al eliminar la suscripción ${subscriptionId}:`, error.message);
+    console.error('Error al crear suscripción:', error.message);
   }
 }
+
+// Endpoint para listar entidades
+// async function getAllEntities() {
+//   try {
+//     const response = await axiosInstance.get(`${ORION_URL}/entities`);
+//     console.log('Entidades obtenidas:', JSON.stringify(response.data, null, 2));
+//   } catch (error) {
+//     console.error('Error al obtener entidades:', error.message);
+//   }
+// }
+
+// // Llamar a la función para probarla
+// getAllEntities();
 
 // Llama periódicamente a fetchAndSendWeatherData
 setInterval(fetchAndSendWeatherData, 1 * 60 * 1000);
@@ -171,7 +164,7 @@ async function getEntityById(entityId) {
 }
 
 // Llamar a la función con el ID de la entidad que quieres consultar
-getEntityById('urn:ngsi-v2:WeatherObserved:001');
+getEntityById('urn:ngsi-v2:WeatherObserved:son_pou_torrent');
 
 
 
